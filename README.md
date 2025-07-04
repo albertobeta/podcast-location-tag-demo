@@ -20,13 +20,14 @@ This is a quick proof of concept (not optimized for mobile) built to demonstrate
 
 The entire demo, including HTML, CSS, and JavaScript, is contained in a **single HTML file** to make it self-contained and easy to share. The focus is not on the code itself (which was kept intentionally frugal), but on the overall user interface logic and behavior it demonstrates.
 
-🔑 The live demo includes a **public API key** connected to a free account with daily rate limits. To state the obvious, this is **NOT** best practice: the key should be kept on a secure backend. We left it visible on purpose to keep the GitHub Pages demo fully functional. Please do not abuse the key with excessive requests.
+🔑 The live demo includes a **public API key** connected to a free account with daily rate limits. To state the obvious, this is **NOT** best practice: the key should be kept on a secure backend. We deliberately exposed it to ensure the demo works out of the box on GitHub Pages (which only supports static hosting). Please be mindful and avoid making excessive requests. 
+NEVER do this at home.
 
 ---
 
 ## 🚀 Live Demo
 
-[https://your-username.github.io/podcast-location-demo](https://your-username.github.io/podcast-location-demo)
+[https://albertobeta.github.io/podcast-location-tag-demo/](https://albertobeta.github.io/podcast-location-tag-demo/)
 
 ---
 
