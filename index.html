@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>podcast:location Tag Demo</title>
+  <script>
+    // IMPORTANT: This key should NEVER be exposed in production.
+    // It should be kept on the backend to avoid abuse and quota limits.
+    // This key is exposed here ONLY for demonstration purposes and uses a free account with rate limiting.
+    // Please do NOT abuse it.
+    const locationiqKey = "pk.941791e42cbab69fbaf845b29cfcef8c";
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.4.11/jquery.autocomplete.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      font-size: 14px;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+    }
+    .header {
+      width: 100%;
+      background: #ffffff;
+      border-bottom: 1px solid #eee;
+      padding: 25px 5vw;
+      box-sizing: border-box;
+    }
+    .header h2 {
+      font-size: 1.4rem;
+      margin: 0 0 10px 0;
+    }
+    .bottom-sticky h4 {
+      font-size: 0.8rem;
+      margin: 0;
+      padding: 0;
+    }
+    .header .intro {
+      font-size: 0.8rem;
+      color: #555;
+      max-width: 1000px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px 5vw 300px;
+      box-sizing: border-box;
+      gap: 20px;
+    }
+    .step {
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #eaf4ff;
+      border-left: 5px solid #2196F3;
+      border-radius: 6px;
+    }
+    .step h3 {
+      margin-top: 0;
+      font-size: 1rem;
+    }
+    .radio-group label {
+      margin-right: 20px;
+      font-weight: 500;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      margin-top: 8px;
+    }
+    input[type="radio"] {
+      transform: scale(1.3);
+      margin-right: 8px;
+    }
+    .autocomplete-note {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 10px;
+    }
+    .bottom-sticky {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #fffefc;
+      border-top: 2px solid #eee;
+      padding: 10px 5vw;
+      font-size: 1rem;
+      box-sizing: border-box;
+      z-index: 999;
+    }
+    .json-toggle {
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #0074d9;
+      user-select: none;
+      font-size: 0.8rem;
+    }
+    .json-toggle:hover {
+      text-decoration: underline;
+    }
+    .json-section {
+      display: none;
+      margin-top: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.5rem;
+      font-family: Consolas, Monaco, monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    .location-tag-preview {
+      margin-bottom: 10px;
+      background: #fff3e0;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      padding: 5px 15px 5px 15px;
+      font-size: 0.8rem;
+      font-family: Consolas, Monaco, monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      box-shadow: 0 0 4px rgba(0,0,0,0.06);
+      overflow-x: hidden;
+    }
+    .location-tag-preview code {
+      white-space: inherit;
+      word-break: inherit;
+      padding: 0px 15px 0px 15px;
+    }
+    .autocomplete-suggestions {
+      border: 1px solid #ccc;
+      background: white;
+      overflow: auto;
+      border-radius: 6px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      z-index: 10000 !important;
+    }
+    .autocomplete-suggestion {
+      padding: 10px;
+      font-size: 1rem;
+      line-height: 1.5;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    .autocomplete-selected {
+      background-color: #eaf4ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>podcast:location Tag Demo</h2>
+  <div class="intro">
+    This implementation of the <strong>podcast:location</strong> tag follows the <a href="https://podcasting2.org/docs/podcast-namespace/tags/location" target="_blank">latest specifications and best practices</a>, including the use of OpenStreetMap (OSM). One of the main goals of this demo is to offer location autocompletion for a better user experience and more accurate data. For more details, visit the <a href="https://github.com/albertobeta/podcast-location-tag-demo/tree/main" target="_blank">Github repository</a>.
+  </div>
+  </div>
+
+  <div class="container">
+    <div class="step" id="step1">
+      <h3>Step 1: Choose location type</h3>
+      <div class="radio-group">
+        <label><input type="radio" name="rel" value="subject">Subject<small>&nbsp;(What this podcast is about)</small></label>
+        <label><input type="radio" name="rel" value="creator">Creator<small> &nbsp;(Where this podcast is made)</small></label>
+      </div>
+    </div>
+
+    <div class="step" id="step2" style="display:none;">
+      <h3>Step 2: Type a location</h3>
+      <input type="text" id="input-step1" placeholder="Start typing a place name...">
+      <div class="autocomplete-note">
+        This is not about precise geolocation or coordinates, but about meaningful place-based discoverability. For example, if a podcast creator is based in London, simply using “London” is fine unless a specific neighborhood adds useful context. The goal is not to pinpoint homes or exact addresses, but to help listeners find content by general place names.
+      </div>
+    </div>
+
+    <div class="step" id="step3" style="display:none;">
+      <h3 id="step3-heading">Optional: Add second location</h3>
+      <div class="radio-group">
+        <label><input type="radio" id="rel-second" disabled> <span id="second-label"></span></label>
+      </div>
+      <input type="text" id="input-step2" placeholder="Start typing second location...">
+    </div>
+  </div>
+
+<div class="bottom-sticky">
+
+  <h4>Location Tag Preview</h4>
+  <div class="location-tag-preview" id="location-tag-box" style="display:none;">
+    <code id="location-tag-preview"></code>
+  </div>
+
+  <div class="json-section" id="json-box"><pre id="json-output"></pre></div>
+  <div class="json-toggle" id="toggle-json">▶ Show JSON Response</div>
+</div>
+
+  <script>
+    const locations = { subject: null, creator: null };
+    let firstType = null;
+    let secondType = null;
+
+    function generateTag(rel, data) {
+      if (!data) return "";
+      const lat = data.lat;
+      const lon = data.lon;
+      const osmId = data.osm_id;
+      const osmType = data.osm_type;
+      const label = data.display_name.split(",")[0];
+      const country = data.address && data.address.country_code ? data.address.country_code.toUpperCase() : "XX";
+      const osmPrefix = { node: "N", way: "W", relation: "R" }[osmType.toLowerCase()] || "R";
+      const osm = osmPrefix + osmId;
+      return `<podcast:location rel="${rel}" geo="geo:${lat},${lon}" osm="${osm}" country="${country}">${label}</podcast:location>`;
+    }
+
+    function updatePreview() {
+      const tagSubject = locations.subject ? generateTag("subject", locations.subject) : "";
+      const tagCreator = locations.creator ? generateTag("creator", locations.creator) : "";
+      const combined = [tagSubject, tagCreator].filter(Boolean).join("\n\n");
+      $('#location-tag-preview').text(combined);
+      $('#location-tag-box').toggle(Boolean(combined));
+    }
+
+    function updateJSONBox() {
+      const merged = {
+        ...(locations.subject && { subject: locations.subject }),
+        ...(locations.creator && { creator: locations.creator })
+      };
+      $('#json-output').text(JSON.stringify(merged, null, 2));
+    }
+
+    function handleSelection(rel, data) {
+      locations[rel] = data;
+      updatePreview();
+      updateJSONBox();
+
+      if (rel === firstType && !locations[secondType]) {
+        $('#step3').show();
+        const label = secondType.charAt(0).toUpperCase() + secondType.slice(1);
+        $('#step3-heading').html(`Optional: Add location for <em>${label}</em>`);
+        $('#rel-second').prop('checked', true);
+        $('#second-label').text(
+          secondType.charAt(0).toUpperCase() + secondType.slice(1) +
+          (secondType === "creator" ? " (i.e. Where this podcast is made)" : " (i.e. What this podcast is about)")
+        );
+
+        const stickyHeight = document.querySelector(".bottom-sticky").offsetHeight;
+        const step3 = document.getElementById("step3");
+        const step3Top = step3.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+          top: step3Top - stickyHeight - 10, 
+          behavior: "smooth"
+        });
+      }
+    }
+
+    function initAutocomplete(inputId, getRel) {
+      $(`#${inputId}`).autocomplete({
+        minChars: 3,
+        deferRequestBy: 300,
+        serviceUrl: 'https://api.locationiq.com/v1/autocomplete.php',
+        paramName: 'q',
+        params: {
+          key: locationiqKey,
+          format: "json",
+          limit: 10
+        },
+        ajaxSettings: {
+          dataType: 'json'
+        },
+        formatResult: function(suggestion) {
+          const typeRaw = suggestion.data.type || "";
+          const typeFormatted = typeRaw.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          const label = typeFormatted ? `<strong>[${typeFormatted}]</strong> ` : "";
+          return `<div>${label}${suggestion.data.display_name}</div>`;
+        },
+        transformResult: function(response) {
+          return {
+            suggestions: $.map(response, function(item) {
+              return { value: item.display_name, data: item };
+            })
+          };
+        },
+        onSelect: function(suggestion) {
+          handleSelection(getRel(), suggestion.data);
+        }
+      });
+    }
+
+    $('input[name="rel"]').change(function () {
+      firstType = $(this).val();
+      secondType = firstType === "subject" ? "creator" : "subject";
+      locations.subject = null;
+      locations.creator = null;
+      $('#step2').show();
+      $('#step3').hide();
+      $('#input-step1').val('');
+      $('#input-step2').val('');
+      $('#location-tag-preview').text('');
+      $('#json-output').text('');
+      $('#location-tag-box').hide();
+    });
+
+    $('#toggle-json').click(function () {
+      $('#json-box').slideToggle();
+      const txt = $(this).text().includes("Show") ? "▼ Hide JSON Response" : "▶ Show JSON Response";
+      $(this).text(txt);
+    });
+
+    initAutocomplete("input-step1", () => firstType);
+    initAutocomplete("input-step2", () => secondType);
+  </script>
+</body>
+</html>
